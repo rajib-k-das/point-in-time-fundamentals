@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_sec__facts
+    description: Typed, de-duplicated SEC facts. Grain = one filing's value for one concept and period.
+    columns:
+      - name: fact_id
+        description: Surrogate key (cik + concept + unit + period + accession number).
+        data_tests: [unique, not_null]
+      - name: cik
+        data_tests: [not_null]
+      - name: concept
+        data_tests: [not_null]
+      - name: period_end
+        data_tests: [not_null]
+      - name: value
+        data_tests: [not_null]
+      - name: filed_date
+        description: Date the filing was submitted to the SEC -- the "knowledge date" for point-in-time logic.
+        data_tests: [not_null]
+      - name: form
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['10-K', '10-K/A', '10-Q', '10-Q/A']
+      - name: period_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['instant', 'duration']

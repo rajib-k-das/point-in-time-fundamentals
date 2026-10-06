@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_facts__mapped
+    description: >
+      SEC facts mapped to standard metrics with one tag chosen per metric, period, and filing.
+      Grain = one filing's value for one metric and period.
+    columns:
+      - name: metric_fact_id
+        data_tests: [unique, not_null]
+      - name: metric
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('concept_map')
+                field: metric
+      - name: period_grain
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['instant', 'quarter', 'annual', 'year_to_date']

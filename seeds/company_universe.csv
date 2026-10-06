@@ -1,0 +1,29 @@
+ticker,sector
+AAPL,Information Technology
+MSFT,Information Technology
+NVDA,Information Technology
+ORCL,Information Technology
+CSCO,Information Technology
+INTC,Information Technology
+GOOGL,Communication Services
+META,Communication Services
+NFLX,Communication Services
+DIS,Communication Services
+VZ,Communication Services
+AMZN,Consumer Discretionary
+HD,Consumer Discretionary
+NKE,Consumer Discretionary
+PG,Consumer Staples
+KO,Consumer Staples
+PEP,Consumer Staples
+WMT,Consumer Staples
+COST,Consumer Staples
+JNJ,Health Care
+PFE,Health Care
+UNH,Health Care
+XOM,Energy
+CVX,Energy
+CAT,Industrials
+BA,Industrials
+GE,Industrials
+MMM,Industrials

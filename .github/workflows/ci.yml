@@ -1,0 +1,27 @@
+name: dbt build
+
+# Runs on every push and pull request: loads the synthetic test fixture
+# and builds + tests every dbt model, so broken SQL never reaches main.
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Load test fixture into DuckDB
+        run: python ingest/fetch_sec_facts.py --offline --raw-dir tests/fixtures
+
+      - name: Build and test dbt models
+        run: dbt build

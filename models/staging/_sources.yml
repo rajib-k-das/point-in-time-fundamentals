@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: sec
+    schema: raw
+    description: Raw SEC EDGAR company facts, loaded by ingest/fetch_sec_facts.py.
+    tables:
+      - name: sec_facts
+        description: >
+          One row per value reported in a 10-K, 10-Q, or amendment, for mapped us-gaap concepts.
+          The same period can appear many times (original filing, later comparatives, amendments).
