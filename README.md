@@ -102,7 +102,7 @@ A warehouse that keeps only the latest values would report 9 for both dates.
 
 ## Dashboard
 
-[![Point-in-Time Equity Screen dashboard](desktop/dashboard.png)](https://public.tableau.com/app/profile/rajib.kumar.das/viz/Point-in-TimeEquityScreen/Point-in-TimeEquityScreen)
+[![Point-in-Time Equity Screen dashboard](docs/dashboard.png)](https://public.tableau.com/app/profile/rajib.kumar.das/viz/Point-in-TimeEquityScreen/Point-in-TimeEquityScreen)
 
 A [live Tableau Public dashboard](https://public.tableau.com/app/profile/rajib.kumar.das/viz/Point-in-TimeEquityScreen/Point-in-TimeEquityScreen) shows three views: today's screen, restatements split into genuine revisions vs. data artifacts, and each company's F-score through time, highlighting months where the score changed **without** a new annual report because a published number was revised.
 
