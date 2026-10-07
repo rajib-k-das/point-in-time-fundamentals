@@ -1,0 +1,29 @@
+Ticker,Company,Sector,As Of Date,Fiscal Year End,F-Score,Signals Available,Complete Score,Gross Margin,Operating Margin,Net Margin,FCF Margin,Accruals Ratio,Total Debt ($B),Debt Source,Debt to Equity,Revenue ($B),Net Income Basis
+AAPL,Apple Inc.,Information Technology,2026-09-30,2025-09-27,8,9,true,0.4691,0.3197,0.2692,0.2373,0.0015,98.68,long_term_debt_incl_current,1.34,416.16,net_income
+COST,COSTCO WHOLESALE CORP /NEW,Consumer Staples,2026-09-30,2025-08-31,8,9,true,0.1284,0.0377,0.0294,0.0285,-0.0713,5.79,noncurrent_plus_current,0.2,275.24,net_income
+GOOGL,Alphabet Inc.,Communication Services,2026-09-30,2025-12-31,8,9,true,0.5965,0.3203,0.3281,0.1819,-0.0623,49.09,long_term_debt_incl_current,0.12,402.84,net_income
+CSCO,"CISCO SYSTEMS, INC.",Information Technology,2026-09-30,2026-07-25,7,9,true,0.6452,0.2427,0.2095,0.2016,-0.0072,22.87,long_term_debt_incl_current,0.45,63.33,net_income
+DIS,WALT DISNEY CO/,Communication Services,2026-09-30,2025-09-27,7,8,false,,0.1859,0.1314,0.1067,-0.0289,42.03,long_term_debt_incl_current,0.38,94.43,net_income
+KO,COCA COLA CO,Consumer Staples,2026-09-30,2025-12-31,7,9,true,0.6163,0.2871,0.2734,0.1105,0.0555,45.44,incl_finance_leases,1.41,47.94,net_income
+NFLX,NETFLIX INC,Communication Services,2026-09-30,2025-12-31,7,9,true,0.4849,0.2949,0.243,0.2094,0.0152,14.46,noncurrent_plus_current,0.54,45.18,net_income
+NKE,"NIKE, Inc.",Consumer Discretionary,2026-09-30,2026-05-31,7,9,true,0.4291,,0.067,0.0471,0.0064,7.94,long_term_debt_incl_current,0.53,46.4,net_income
+UNH,UnitedHealth Group Incorporated,Health Care,2026-09-30,2025-12-31,7,9,true,0.8868,0.0424,0.0269,0.0359,-0.0251,72.32,noncurrent_plus_current,,447.57,net_income
+WMT,WALMART INC.,Consumer Staples,2026-09-30,2026-01-31,7,9,true,0.2421,0.0422,0.031,0.0211,-0.0721,44.76,long_term_debt_incl_current,0.45,706.41,net_income
+AMZN,AMAZON COM INC,Consumer Discretionary,2026-09-30,2025-12-31,6,9,true,0.5029,0.1116,0.1083,,-0.0857,69.29,long_term_debt_incl_current,0.17,716.92,net_income
+BA,THE BOEING COMPANY,Industrials,2026-09-30,2025-12-31,6,9,true,0.0479,0.0479,0.025,-0.021,0.0072,53.85,long_term_debt_incl_current,9.87,89.46,net_income
+CAT,CATERPILLAR INC,Industrials,2026-09-30,2025-12-31,6,9,true,0.3379,0.165,0.1314,0.1319,-0.0307,36.21,noncurrent_plus_current,,67.59,net_income_incl_nci
+INTC,INTEL CORP,Information Technology,2026-09-30,2025-12-27,6,9,true,0.3477,-0.0419,-0.0051,-0.0936,-0.0489,46.59,long_term_debt_incl_current,0.41,52.85,net_income
+META,"Meta Platforms, Inc.",Communication Services,2026-09-30,2025-12-31,6,9,true,0.82,0.4144,0.3008,0.2294,-0.1724,58.74,long_term_debt_incl_current,0.27,200.97,net_income
+MSFT,MICROSOFT CORPORATION,Information Technology,2026-09-30,2026-06-30,6,9,true,0.6794,0.4678,0.4031,0.2019,-0.0714,40.29,long_term_debt_incl_current,0.09,331.84,net_income
+PEP,"PepsiCo, Inc.",Consumer Staples,2026-09-30,2025-12-27,6,9,true,0.5415,0.1224,0.0877,,-0.0372,53.21,long_term_debt_incl_current,2.61,93.93,net_income
+PFE,PFIZER INC,Health Care,2026-09-30,2025-12-31,6,9,true,0.7433,,0.1242,0.145,-0.0187,64.64,noncurrent_plus_current,0.75,62.58,net_income
+PG,The Procter & Gamble Company,Consumer Staples,2026-09-30,2026-06-30,6,9,true,0.5018,0.2269,0.1844,0.174,-0.0279,34.14,noncurrent_plus_current,,87.03,net_income
+CVX,Chevron Corp,Energy,2026-09-30,2025-12-31,5,9,true,0.4133,,0.0667,,-0.0745,40.76,incl_finance_leases,0.22,184.43,net_income
+GE,GENERAL ELECTRIC CO,Industrials,2026-09-30,2025-12-31,5,8,false,,,0.1898,,0.0013,20.49,long_term_debt_incl_current,1.1,45.86,net_income
+MMM,3M CO,Industrials,2026-09-30,2025-12-31,5,9,true,0.3991,0.1855,0.1303,0.056,0.0243,12.6,long_term_debt_incl_current,2.68,24.95,net_income
+ORCL,Oracle Corporation,Information Technology,2026-09-30,2026-05-31,5,8,false,,0.3059,0.2537,-0.3516,-0.0692,129.54,company_reported_total,3.05,67.36,net_income
+VZ,VERIZON COMMUNICATIONS INC,Communication Services,2026-09-30,2025-12-31,5,8,false,,0.2117,0.1243,,-0.0506,158.15,company_reported_total,,138.19,net_income
+HD,"The Home Depot, Inc.",Consumer Discretionary,2026-09-30,2026-02-01,4,9,true,0.3332,0.1268,0.086,,-0.0216,53.86,long_term_debt_incl_current,4.2,164.68,net_income
+JNJ,Johnson & Johnson,Health Care,2026-09-30,2025-12-28,4,9,true,0.6788,,0.2846,0.2091,0.012,49.93,long_term_debt_incl_current,0.61,94.19,net_income
+NVDA,NVIDIA CORP,Information Technology,2026-09-30,2026-01-25,4,9,true,0.7107,0.6038,0.556,,0.109,8.47,long_term_debt_incl_current,0.05,215.94,net_income
+XOM,ExxonMobil Holdings Corp,Energy,2026-09-30,2025-12-31,3,6,false,,,0.0868,0.0711,-0.0513,,,,332.24,net_income

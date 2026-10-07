@@ -1,0 +1,22 @@
+Metric,Facts,Facts Restated,Share Restated,Genuine Revisions,Tag Switches,Scale Error Corrections
+cost_of_revenue,2705,310,0.1146,291,33,0
+revenue,3047,286,0.0939,261,99,0
+operating_income,2469,217,0.0879,227,0,0
+operating_cash_flow,2004,172,0.0858,180,0,0
+net_income,3138,149,0.0475,159,0,0
+diluted_shares,2836,149,0.0525,133,0,20
+gross_profit,1432,135,0.0943,143,0,0
+net_income_incl_nci,1686,108,0.0641,116,0,0
+capex,1684,79,0.0469,80,0,0
+total_assets,1885,78,0.0414,91,0,0
+total_equity,1242,51,0.0411,55,0,0
+current_assets,1836,51,0.0278,55,0,0
+current_liabilities,1836,49,0.0267,52,0,0
+shareholders_equity,1599,29,0.0181,29,0,0
+long_term_debt,1216,28,0.023,32,0,0
+long_term_debt_incl_current,617,22,0.0357,25,0,0
+long_term_debt_current,793,14,0.0177,14,0,0
+short_term_borrowings,540,11,0.0204,15,0,0
+total_debt_reported,143,5,0.035,6,0,0
+commercial_paper,429,1,0.0023,2,0,0
+long_term_debt_incl_leases,72,1,0.0139,1,0,0
