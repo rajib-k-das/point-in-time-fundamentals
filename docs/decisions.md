@@ -113,6 +113,7 @@ one current version per fact, and contiguous, non-overlapping windows.
 **Evidence:** `analyses/concept_switches.sql` showed **549 of 601 (91%)** equity "restatements" happened when the reported tag
 switched between the two equity definitions. Shareholders' equity looked restated for 29% of facts, three times any other metric.
 The two long-term debt tag switches moved values by a median 15%: the gap between the two definitions, not a revision.
+**Result:** equity's restatement rate fell from 29.2% to 1.9% of facts, in line with other balance-sheet metrics (1.9–4.3%).
 **Why:** If two tags can legitimately report different numbers for the same period, a change between them is not a restatement.
 The mapping was manufacturing restatements.
 **Guard:** `assert_concept_map_is_consistent` fails if a metric mixes units or period types, or two tags share a priority;

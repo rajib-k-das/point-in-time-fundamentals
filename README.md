@@ -55,12 +55,20 @@ But the changes were not all restatements:
 - **Rounding noise:** Walmart revenue moved 114,070M → 114,071M → 114,070M across filings.
 - **Mapping artifacts:** shareholders' equity looked restated for 29% of facts, three times any other metric. In fact,
   91% of those "restatements" were filings switching between equity *with* and *without* non-controlling interest.
-  Splitting them into two metrics removed the false signal.
+  Splitting them into two metrics cut equity's restatement rate from **29.2% to 1.9%**.
 - **Genuine revisions:** amendments, and re-presentations after divestitures or new accounting standards
   (e.g. revenue re-tagged and restated under ASC 606 in 2018, flagged as `is_tag_switch`).
 
+After cleaning, **6.1% of facts (1,801 of 29,398) were genuinely restated at least once**, down from a naive 8.2%.
 The SCD Type 2 model (`int_fact_versions`) keeps every meaningful version, ignores rounding noise, and flags
-scale errors so screening can exclude them without rewriting history.
+scale errors (20) and equivalent-tag switches (125) so screening can exclude or audit them without rewriting history.
+
+| Measure | Before cleaning | After |
+|---|---|---|
+| Facts ever restated | 2,243 (8.2%) | 1,801 (6.1%) |
+| Shareholders' equity restated | 29.2% of facts | 1.9% |
+| Restatements flagged as scale errors | — | 20 |
+| Restatements flagged as tag switches | — | 125 (revenue 92, cost of revenue 33) |
 
 ### Point-in-time lookup
 
