@@ -22,6 +22,9 @@ models:
     intermediate:
       +materialized: table
       +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
 
 seeds:
   point_in_time_fundamentals:

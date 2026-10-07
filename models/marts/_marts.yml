@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: dim_company
+    description: One row per company with SEC data; sector from the curated universe.
+    columns:
+      - name: ticker
+        data_tests: [unique, not_null]
+      - name: cik
+        data_tests: [not_null]
+
+  - name: dim_date
+    description: Daily calendar from 2009 to today, with month-end flags.
+    columns:
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: fct_fundamentals
+    description: >
+      Point-in-time fundamentals. One row per version of each annual, quarterly (including derived Q4)
+      and balance-sheet value, valid from valid_from (inclusive) to valid_to (exclusive).
+    columns:
+      - name: version_id
+        data_tests: [unique, not_null]
+      - name: ticker
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_company')
+                field: ticker
+      - name: period_grain
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['annual', 'quarter', 'instant']
+      - name: valid_from
+        data_tests: [not_null]
+      - name: is_derived
+        description: True for Q4 values derived as annual minus nine-month year-to-date.
+        data_tests: [not_null]
+
+  - name: fct_screening_monthly
+    description: >
+      Monthly stock screen built only from information public on each month-end: Piotroski F-score
+      (9 signals, null when an input is unknown), Sloan accruals ratio, margins and total debt.
+    columns:
+      - name: as_of_date
+        data_tests: [not_null]
+      - name: ticker
+        data_tests: [not_null]
+      - name: f_score
+        description: Count of signals that hold. Compare with f_score_signals_available.
+        data_tests: [not_null]
+      - name: f_score_signals_available
+        description: How many of the 9 signals had all their inputs. 9 means a complete score.
+        data_tests: [not_null]

@@ -136,9 +136,58 @@ values moved (median 4.4%). These are real re-presentations under a new standard
 **Why:** Dropping them would hide genuine history; leaving them unmarked would blur "the company revised its number" with
 "the company re-presented it under a new standard". The flag lets screens and analyses separate the two.
 
+## 014 — Derived Q4 values are versioned by the overlap of their inputs
+
+**Decision:** Q4 = annual value − nine-month year-to-date value (same fiscal year start). Every pairing of an annual
+version with a nine-month version is a candidate Q4 version, valid only while *both* inputs were the latest public
+numbers: from the later of the two `valid_from` dates to the earlier of the two `valid_to` dates.
+**Why:** Companies never file a Q4 report. If the annual figure is amended, Q4 changes; if the nine-month figure is
+restated, Q4 changes too. Using a restated input before it was published would reintroduce lookahead bias through
+the derivation. Intersecting the two timelines keeps derived values exactly as point-in-time as reported ones.
+**Rules:** a directly reported Q4 always wins over a derived one; scale-error inputs are never used.
+**Test:** `assert_fixture_known_answers` checks a hand-calculated case: Q4 revenue of 120 − 87 = 33, becoming
+114 − 87 = 27 on the day the 10-K/A became public.
+
+## 015 — Q4 is derived only for income-statement and cash-flow amounts
+
+**Decision:** Only metrics with `balance_type = duration` and `unit = USD` in `concept_map`.
+**Why:** Balance-sheet items are snapshots at a date; there's nothing to subtract. Diluted shares are a weighted
+average, and annual average minus nine-month average is not the Q4 average.
+
+## 016 — Validity windows plus a month-end snapshot, not a daily table
+
+**Decision:** `fct_fundamentals` keeps one row per version with its validity window. Screening runs on month-ends
+(`fct_screening_monthly`).
+**Why:** A daily table would hold roughly 29,000 facts × 5,000 days, about 145 million rows that are almost all
+identical to the day before. Windows store the same information compactly, and any date can still be queried.
+**Trade-off:** Screens rebalance monthly. A daily view can be generated from the windows if ever needed.
+
+## 017 — Screens use the latest annual report known on each month-end
+
+**Decision:** Each month-end compares fiscal year *t* (the latest annual report public on that date) with year *t−1*;
+year *t−2* supplies beginning-of-year assets. Prior years count only if consecutive (350–380 days apart).
+**Piotroski F-score:** the nine standard signals, each 1, 0, or **null when an input is unknown**. Unknown inputs are
+never scored as 0, so the score is reported with `f_score_signals_available`; a complete score has 9.
+Details: ROA and asset turnover use beginning-of-year assets; leverage is long-term debt over average assets;
+gross margin falls back to revenue − cost of revenue when gross profit isn't tagged.
+**Why point-in-time matters here:** in the fixture, the same company scores **8 of 8** in March 2023 (its share
+count was a scale error, so the dilution signal is unknown) and **9 of 9** in March 2024, after the correction was
+filed. A naive warehouse would show 9 for both dates, using information nobody had in 2023.
+**Stock splits:** splits don't fake a "dilution" signal, because the latest 10-K re-presents the prior year's share
+count split-adjusted, and the SCD2 model uses that newer version for both years.
+
+## 018 — Total debt is built from components
+
+**Decision:** `total_debt = long-term debt including current portion + short-term debt`.
+Long-term part: `LongTermDebt`, or `LongTermDebtNoncurrent + LongTermDebtCurrent` when only the split is reported.
+Short-term part: `ShortTermBorrowings`; `CommercialPaper` when it's the only short-term tag; both added only when
+commercial paper exceeds the borrowings total (so it can't be inside it). No short-term tag counts as zero.
+**Why:** No single XBRL tag equals total debt, and commercial paper is sometimes inside short-term borrowings and
+sometimes separate. Adding both blindly double-counts; ignoring paper undercounts.
+**Check:** `analyses/commercial_paper_check.sql` classifies every company's pattern on real data.
+
 ## Open questions (next)
 
-- **Diluted shares and stock splits:** same-tag diluted-share restatements have a median change of exactly 100%. Hypothesis:
-  prior share counts re-presented after stock splits. Verify against known split dates; it matters for per-share metrics.
-- **Q4 values:** 10-Ks report annual totals only. Derive Q4 as annual minus nine-month YTD, and decide which
-  versions of each to use when either one has been restated.
+- **Diluted shares and stock splits:** same-tag diluted-share restatements have a median change of exactly 100%.
+  Hypothesis: prior share counts re-presented after splits. Verify against known split dates.
+- **Commercial paper rule:** review `commercial_paper_check` results and confirm decision 018 per company.

@@ -27,9 +27,9 @@ can be queried **as of** any date.
 | Intermediate | XBRL tags mapped to standard metrics, period grain classified | ✅ Done |
 | Intermediate | Restatement history as SCD Type 2 (`valid_from` / `valid_to`), with scale-error flags | ✅ Done |
 | Intermediate | Tag-switch audit: non-equivalent tags split into separate metrics, equivalent switches flagged | ✅ Done |
-| Intermediate | Derived Q4 values (annual minus nine-month year-to-date) | ⏳ Planned |
-| Marts | `dim_company`, `dim_date`, point-in-time `fct_fundamentals` | ⏳ Planned |
-| Marts | Screening metrics: Piotroski F-score, accruals ratio, margins | ⏳ Planned |
+| Intermediate | Derived Q4 values (annual minus nine-month YTD), versioned by the overlap of both inputs | ✅ Done |
+| Marts | `dim_company`, `dim_date`, point-in-time `fct_fundamentals` | ✅ Done |
+| Marts | Monthly screen: Piotroski F-score, accruals ratio, margins, total debt | ✅ Done |
 | BI | Tableau Public screening and restatement dashboard | ⏳ Planned |
 
 ## Architecture
@@ -41,8 +41,12 @@ flowchart LR
     B --> C[staging<br/>stg_sec__facts]
     C --> D[intermediate<br/>int_facts__mapped]
     D --> E[intermediate<br/>int_fact_versions<br/>SCD Type 2]
-    E --> F[marts<br/>point-in-time fundamentals]
-    F --> G[Tableau Public<br/>dashboard]
+    E --> Q[intermediate<br/>int_q4_derived_versions]
+    E --> F[marts<br/>fct_fundamentals]
+    Q --> F
+    F --> M[intermediate<br/>annual fundamentals<br/>known at each month-end]
+    M --> SC[marts<br/>fct_screening_monthly]
+    SC --> G[Tableau Public<br/>dashboard]
 ```
 
 ## What the data showed
@@ -82,6 +86,25 @@ where ticker = 'AAPL'
 
 Or run `python scripts/run_analysis.py as_of_lookup --vars '{"as_of_date": "2023-03-01", "ticker": "AAPL"}'`.
 
+## The screen
+
+`fct_screening_monthly` scores every company at every month-end using only what was public that day:
+the **Piotroski F-score** (nine signals; unknown inputs are reported as unknown, never as zero),
+the **Sloan accruals ratio**, gross / operating / net / free-cash-flow margins, and **total debt**.
+
+Point-in-time changes the answer. In the test fixture, the same company scores **8 of 8** in March 2023,
+because its share count had been filed with a scale error, and **9 of 9** in March 2024, after the correction.
+A warehouse that keeps only the latest values would report 9 for both dates.
+
+## Testing
+
+64 dbt tests run on every push (GitHub Actions), including:
+
+- **Point-in-time integrity:** one current version per fact, and no gaps or overlaps in validity windows.
+- **Mapping integrity:** each XBRL tag feeds one metric, and no metric mixes units or period types.
+- **Known answers:** a synthetic company with hand-calculated results (Q4 33 → 27 after an amendment,
+  F-score 8 → 9 after a scale-error correction). Breaking the Q4 formula fails this test.
+
 ## Key design decisions
 
 The reasoning behind each modeling choice is logged in [`docs/decisions.md`](docs/decisions.md).
@@ -94,6 +117,7 @@ Highlights:
 - **Different numbers, different metrics.** Tags that can disagree for the same period never share a metric; a test enforces it.
 - **Keep scale errors, but flag them.** Point-in-time history stays honest; screens filter them out.
 - **Known the day after filing.** Filings often land after the close, so same-day use would leak information.
+- **Derived values are versioned too.** Q4 is valid only while both of its inputs were public.
 - **Financial-sector companies excluded.** Banks don't report gross profit or current assets,
   so standard screening scores don't apply to them.
 

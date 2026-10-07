@@ -20,3 +20,5 @@ long_term_debt_incl_current,LongTermDebt,1,USD,instant
 shareholders_equity,StockholdersEquity,1,USD,instant
 total_equity,StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,1,USD,instant
 short_term_borrowings,ShortTermBorrowings,1,USD,instant
+long_term_debt_current,LongTermDebtCurrent,1,USD,instant
+commercial_paper,CommercialPaper,1,USD,instant
