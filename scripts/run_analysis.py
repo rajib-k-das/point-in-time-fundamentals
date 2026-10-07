@@ -25,14 +25,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("name", help="analysis file name without .sql")
     parser.add_argument("--rows", type=int, default=20, help="maximum rows to print")
+    parser.add_argument("--vars", default=None, help='dbt vars as JSON, e.g. \'{"ticker": "KO"}\'')
     args = parser.parse_args()
 
     if not (ROOT / "analyses" / f"{args.name}.sql").exists():
         sys.exit(f"No file analyses/{args.name}.sql")
 
-    result = subprocess.run(
-        ["dbt", "compile", "--select", args.name], cwd=ROOT, capture_output=True, text=True
-    )
+    command = ["dbt", "compile", "--select", args.name]
+    if args.vars:
+        command += ["--vars", args.vars]
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     if result.returncode != 0:
         print(result.stdout, result.stderr)
         sys.exit(result.returncode)

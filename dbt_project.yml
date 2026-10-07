@@ -7,6 +7,13 @@ model-paths: ["models"]
 seed-paths: ["seeds"]
 test-paths: ["tests/data_tests"]
 
+vars:
+  # Decision 007: a re-reported value starts a new version only if it moves by more than 0.01%.
+  restatement_tolerance: 0.0001
+  # Decision 008: a superseded value is a suspected XBRL scale error if it differs from the
+  # current value by a power of 1,000 (log10 of the ratio within this distance of 3, 6 or 9).
+  scale_error_log_tolerance: 0.02
+
 models:
   point_in_time_fundamentals:
     staging:

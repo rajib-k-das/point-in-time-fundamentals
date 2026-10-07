@@ -20,3 +20,37 @@ models:
           - accepted_values:
               arguments:
                 values: ['instant', 'quarter', 'annual', 'year_to_date']
+
+  - name: int_fact_versions
+    description: >
+      SCD Type 2 history of every reported fact (one metric, company and period). One row per
+      meaningfully different value, valid from the day after it was first filed until the day
+      after it was superseded. Point-in-time lookup:
+      `valid_from <= as_of_date and (valid_to is null or as_of_date < valid_to)`.
+    columns:
+      - name: version_id
+        description: Surrogate key (fact_key + version_number).
+        data_tests: [unique, not_null]
+      - name: fact_key
+        description: One metric for one company and one period.
+        data_tests: [not_null]
+      - name: version_number
+        description: 1 for the first published value, then +1 for each meaningful change.
+        data_tests: [not_null]
+      - name: value
+        data_tests: [not_null]
+      - name: valid_from
+        description: First date the value was public (filed date + 1 day). Inclusive.
+        data_tests: [not_null]
+      - name: valid_to
+        description: Date the value was superseded (the next version's valid_from). Exclusive; null if current.
+      - name: is_current
+        data_tests: [not_null]
+      - name: is_restatement
+        description: True when this value replaced an earlier, different published value.
+        data_tests: [not_null]
+      - name: is_scale_error
+        description: >
+          True when this superseded value differs from the current value by a power of 1,000,
+          which indicates an XBRL scale-tagging error. Exclude these from analytics.
+        data_tests: [not_null]
