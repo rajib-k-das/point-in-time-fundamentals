@@ -1,0 +1,20 @@
+version: 2
+
+seeds:
+  - name: concept_map
+    description: >
+      Maps XBRL tags to standard metrics. Tags under one metric must measure the same thing
+      (decision 012); priority breaks ties when one filing reports several of them.
+    columns:
+      - name: source_concept
+        description: Each XBRL tag feeds exactly one metric.
+        data_tests: [unique, not_null]
+      - name: metric
+        data_tests: [not_null]
+      - name: priority
+        data_tests: [not_null]
+
+  - name: company_universe
+    columns:
+      - name: ticker
+        data_tests: [unique, not_null]

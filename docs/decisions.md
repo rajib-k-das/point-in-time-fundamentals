@@ -105,10 +105,39 @@ next version's `valid_from`. The current version has `valid_to = null`.
 one current version per fact, and contiguous, non-overlapping windows.
 **Lookup:** `valid_from <= as_of_date and (valid_to is null or as_of_date < valid_to)`.
 
+## 012 — Tags that measure different things get different metrics
+
+**Decision:** Split two metrics that mixed non-equivalent tags:
+`shareholders_equity` (`StockholdersEquity`, parent only) vs. `total_equity` (including non-controlling interest), and
+`long_term_debt` (`LongTermDebtNoncurrent`) vs. `long_term_debt_incl_current` (`LongTermDebt`, which adds the current portion).
+**Evidence:** `analyses/concept_switches.sql` showed **549 of 601 (91%)** equity "restatements" happened when the reported tag
+switched between the two equity definitions. Shareholders' equity looked restated for 29% of facts, three times any other metric.
+The two long-term debt tag switches moved values by a median 15%: the gap between the two definitions, not a revision.
+**Why:** If two tags can legitimately report different numbers for the same period, a change between them is not a restatement.
+The mapping was manufacturing restatements.
+**Guard:** `assert_concept_map_is_consistent` fails if a metric mixes units or period types, or two tags share a priority;
+each tag can feed only one metric (`unique` test on `source_concept`).
+**Trade-off:** A company that reports only one equity tag has no value for the other metric. The marts choose explicitly
+which definition each ratio uses, instead of the mapping choosing silently.
+
+**Total debt is derived, not tagged.** `LongTermDebt` covers long-term debt including its current portion, but not
+short-term borrowings, so no single tag equals total debt. The marts will compute
+`total_debt = long_term_debt_incl_current + short_term_borrowings` (`ShortTermBorrowings`), each component taken as of
+the same date. Open check: some companies report commercial paper under its own tag instead of inside short-term
+borrowings; verify per company before adding it, to avoid double counting.
+
+## 013 — Equivalent-tag switches are kept, and flagged
+
+**Decision:** Revenue and cost of revenue keep several tags under one metric, and `int_fact_versions.is_tag_switch` marks
+restatements whose tag differs from the version they replaced.
+**Evidence:** 26% of revenue restatements (92 of 350) came with a tag change, mostly around the 2018 adoption of ASC 606, and the
+values moved (median 4.4%). These are real re-presentations under a new standard, not mapping errors.
+**Why:** Dropping them would hide genuine history; leaving them unmarked would blur "the company revised its number" with
+"the company re-presented it under a new standard". The flag lets screens and analyses separate the two.
+
 ## Open questions (next)
 
-- **012 — Tag-switch artifacts:** Shareholders' equity had the most changes (610 across 20 companies). Check with
-  `analyses/concept_switches.sql` whether these come from the mapping switching between tags (equity with vs.
-  without non-controlling interest) rather than from companies revising numbers.
+- **Diluted shares and stock splits:** same-tag diluted-share restatements have a median change of exactly 100%. Hypothesis:
+  prior share counts re-presented after stock splits. Verify against known split dates; it matters for per-share metrics.
 - **Q4 values:** 10-Ks report annual totals only. Derive Q4 as annual minus nine-month YTD, and decide which
   versions of each to use when either one has been restated.

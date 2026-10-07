@@ -112,6 +112,7 @@ windows as (
         first_filed_date + 1                                                  as valid_from,
         lead(first_filed_date + 1) over fact_history                          as valid_to,
         lag(value) over fact_history                                          as previous_version_value,
+        lag(concept) over fact_history                                        as previous_version_concept,
         last_value(value) over (
             fact_history rows between unbounded preceding and unbounded following
         )                                                                     as current_value
@@ -152,6 +153,7 @@ select
             then (value - previous_version_value) / abs(previous_version_value)
     end                                                           as change_vs_previous_pct,
     concept,
+    previous_version_concept,
     form,
     accession_number,
     first_filed_date,
@@ -161,6 +163,9 @@ select
     valid_to,
     valid_to is null                                              as is_current,
     version_number > 1                                            as is_restatement,
+    -- Decision 013: the new value was reported under a different (equivalent) XBRL tag,
+    -- e.g. revenue moving to the ASC 606 tag in 2018. Kept, but made visible.
+    coalesce(concept <> previous_version_concept, false)          as is_tag_switch,
     coalesce(
         valid_to is not null
         and round(log10_ratio_to_current / 3) <> 0

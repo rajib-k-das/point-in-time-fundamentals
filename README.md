@@ -26,7 +26,7 @@ can be queried **as of** any date.
 | Staging | Typed, de-duplicated facts with a surrogate key | ✅ Done |
 | Intermediate | XBRL tags mapped to standard metrics, period grain classified | ✅ Done |
 | Intermediate | Restatement history as SCD Type 2 (`valid_from` / `valid_to`), with scale-error flags | ✅ Done |
-| Intermediate | Tag-switch check on restatements (decision 012) | 🔄 In progress |
+| Intermediate | Tag-switch audit: non-equivalent tags split into separate metrics, equivalent switches flagged | ✅ Done |
 | Intermediate | Derived Q4 values (annual minus nine-month year-to-date) | ⏳ Planned |
 | Marts | `dim_company`, `dim_date`, point-in-time `fct_fundamentals` | ⏳ Planned |
 | Marts | Screening metrics: Piotroski F-score, accruals ratio, margins | ⏳ Planned |
@@ -53,7 +53,11 @@ But the changes were not all restatements:
 - **XBRL scale errors:** Coca-Cola's diluted share count was first tagged as 4,295 instead of 4,295,000,000;
   NVIDIA's was off by 1,000×. A naive warehouse would record these as +99,999,900% "restatements".
 - **Rounding noise:** Walmart revenue moved 114,070M → 114,071M → 114,070M across filings.
-- **Genuine revisions:** amendments, and re-presentations after divestitures or new accounting standards.
+- **Mapping artifacts:** shareholders' equity looked restated for 29% of facts, three times any other metric. In fact,
+  91% of those "restatements" were filings switching between equity *with* and *without* non-controlling interest.
+  Splitting them into two metrics removed the false signal.
+- **Genuine revisions:** amendments, and re-presentations after divestitures or new accounting standards
+  (e.g. revenue re-tagged and restated under ASC 606 in 2018, flagged as `is_tag_switch`).
 
 The SCD Type 2 model (`int_fact_versions`) keeps every meaningful version, ignores rounding noise, and flags
 scale errors so screening can exclude them without rewriting history.
@@ -79,6 +83,7 @@ Highlights:
 - **Seed-driven concept mapping with priorities.** Companies tag revenue at least four different ways;
   a version-controlled mapping table makes the choice explicit, reviewable, and testable.
 - **Version only on meaningful change.** 92.5% of re-reports repeat the same value; changes of 0.01% or less are rounding.
+- **Different numbers, different metrics.** Tags that can disagree for the same period never share a metric; a test enforces it.
 - **Keep scale errors, but flag them.** Point-in-time history stays honest; screens filter them out.
 - **Known the day after filing.** Filings often land after the close, so same-day use would leak information.
 - **Financial-sector companies excluded.** Banks don't report gross profit or current assets,

@@ -49,6 +49,11 @@ models:
       - name: is_restatement
         description: True when this value replaced an earlier, different published value.
         data_tests: [not_null]
+      - name: is_tag_switch
+        description: >
+          True when this restatement was reported under a different, equivalent XBRL tag than the
+          version it replaced (e.g. the 2018 move to the ASC 606 revenue tag).
+        data_tests: [not_null]
       - name: is_scale_error
         description: >
           True when this superseded value differs from the current value by a power of 1,000,

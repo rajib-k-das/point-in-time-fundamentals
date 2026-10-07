@@ -6,6 +6,7 @@ select
     round(100.0 * count(distinct fact_key) filter (where is_restatement)
           / count(distinct fact_key), 2)                                 as pct_facts_restated,
     count(*) filter (where is_restatement)                               as restatements,
+    count(*) filter (where is_tag_switch)                                as tag_switches,
     count(*) filter (where is_scale_error)                               as scale_errors
 from {{ ref('int_fact_versions') }}
 group by rollup (metric)
