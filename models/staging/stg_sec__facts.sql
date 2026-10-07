@@ -8,11 +8,33 @@ with source as (
 
 ),
 
+-- Decision 025: a company that reorganized under a new registrant files under a new CIK, but its
+-- history stays under the predecessor's. Everything is keyed to the current CIK; the CIK that
+-- actually filed each value is kept as filer_cik.
+predecessors as (
+
+    select ticker, lpad(cast(cik as varchar), 10, '0') as cik
+    from {{ ref('predecessor_ciks') }}
+
+),
+
+current_ciks as (
+
+    select source.ticker, any_value(source.cik) as cik
+    from {{ source('sec', 'sec_facts') }} as source
+    anti join predecessors
+        on source.ticker = predecessors.ticker
+       and source.cik = predecessors.cik
+    group by source.ticker
+
+),
+
 typed as (
 
     select
-        ticker,
-        cik,
+        source.ticker,
+        coalesce(current_ciks.cik, source.cik) as cik,
+        source.cik                             as filer_cik,
         entity_name,
         concept,
         unit,
@@ -27,6 +49,7 @@ typed as (
         frame,
         loaded_at
     from source
+    left join current_ciks on source.ticker = current_ciks.ticker
 
 ),
 

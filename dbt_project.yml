@@ -32,3 +32,6 @@ seeds:
     concept_map:
       +column_types:
         priority: integer
+    predecessor_ciks:
+      +column_types:
+        cik: varchar

@@ -5,6 +5,9 @@
 --   F-score on 2024-03-31 = 9 of 9: the corrected share count arrived on 2024-02-13.
 --   TTM figures from a 10-Q (12 months to 2022-09-30) must never become a fiscal year:
 --   on 2022-11-30 the latest fiscal year is still FY2021 (decision 019).
+--   History filed by a predecessor registrant (CIK 0000000001) belongs to the same company,
+--   keyed to its current CIK (decision 025).
+--   Total debt on 2023-03-31 = 90 (non-current long-term debt; no short-term debt) (decision 023).
 with q4_expected as (
 
     select * from (values
@@ -69,6 +72,27 @@ failures as (
     where ticker = 'FIXT'
       and as_of_date = date '2022-11-30'
       and fiscal_year_end is distinct from date '2021-12-31'
+
+    union all
+
+    select 'predecessor history not attached to the current company'
+    where not exists (
+        select 1 from {{ ref('fct_fundamentals') }}
+        where ticker = 'FIXT'
+          and cik = '0009999999'
+          and metric = 'net_income'
+          and period_end = date '2019-12-31'
+          and value = 5000000
+    )
+
+    union all
+
+    select 'total debt or its source on 2023-03-31'
+    from {{ ref('fct_screening_monthly') }}
+    where ticker = 'FIXT'
+      and as_of_date = date '2023-03-31'
+      and (total_debt is distinct from 90000000
+           or total_debt_source is distinct from 'noncurrent_plus_current')
 
     union all
 

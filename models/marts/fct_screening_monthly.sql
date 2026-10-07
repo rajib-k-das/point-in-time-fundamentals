@@ -8,7 +8,7 @@ with years as (
         *,
         row_number() over (partition by cik, as_of_date order by fiscal_year_end desc) as years_back
     from {{ ref('int_annual_fundamentals_monthly') }}
-    where revenue is not null or net_income is not null
+    where revenue is not null or net_income_used is not null
 
 ),
 
@@ -25,12 +25,14 @@ aligned as (
         p.revenue                   as prior_revenue,
         p.cost_of_revenue           as prior_cost_of_revenue,
         p.gross_profit              as prior_gross_profit,
-        p.net_income                as prior_net_income,
+        p.net_income_used           as prior_net_income,
+        p.net_income_basis          as prior_net_income_basis,
+        p.total_debt                as prior_total_debt,
+        p.total_debt_source         as prior_total_debt_source,
         p.diluted_shares            as prior_diluted_shares,
         p.total_assets              as prior_total_assets,
         p.current_assets            as prior_current_assets,
         p.current_liabilities       as prior_current_liabilities,
-        p.long_term_debt            as prior_long_term_debt,
         t.total_assets              as two_back_total_assets
     from current_year as c
     left join prior_year as p
@@ -48,18 +50,15 @@ ratios as (
 
     select
         *,
-        -- Decision 018: total debt = long-term debt including its current portion + short-term debt.
-        coalesce(long_term_debt_incl_current, long_term_debt + coalesce(long_term_debt_current, 0))
-            -- Decision 020: short-term borrowings when reported, otherwise commercial paper; never both,
-            -- because companies may reclassify paper into long-term debt (double counting).
-            + coalesce(short_term_borrowings, commercial_paper, 0)               as total_debt,
-
-        net_income / nullif(prior_total_assets, 0)                             as roa,
-        prior_net_income / nullif(two_back_total_assets, 0)                    as prior_roa,
+        net_income_used / nullif(prior_total_assets, 0)                        as roa,
+        -- Year-over-year comparisons need the same definition in both years (decisions 022 and 024).
+        case when prior_net_income_basis = net_income_basis
+             then prior_net_income / nullif(two_back_total_assets, 0) end      as prior_roa,
         operating_cash_flow / nullif(prior_total_assets, 0)                    as cfo_to_assets,
-        long_term_debt / nullif((total_assets + prior_total_assets) / 2, 0)    as leverage,
-        prior_long_term_debt
-            / nullif((prior_total_assets + two_back_total_assets) / 2, 0)      as prior_leverage,
+        total_debt / nullif((total_assets + prior_total_assets) / 2, 0)        as leverage,
+        case when prior_total_debt_source = total_debt_source
+             then prior_total_debt
+                  / nullif((prior_total_assets + two_back_total_assets) / 2, 0) end as prior_leverage,
         current_assets / nullif(current_liabilities, 0)                        as current_ratio,
         prior_current_assets / nullif(prior_current_liabilities, 0)            as prior_current_ratio,
         coalesce(gross_profit, revenue - cost_of_revenue) / nullif(revenue, 0) as gross_margin,
@@ -99,19 +98,21 @@ select
     date_diff('day', signals.fiscal_year_end, signals.as_of_date)          as days_since_fiscal_year_end,
 
     signals.revenue,
-    signals.net_income,
+    signals.net_income_used                                                  as net_income,
+    signals.net_income_basis,
     signals.operating_cash_flow,
     signals.total_assets,
     signals.total_debt,
+    signals.total_debt_source,
     signals.shareholders_equity,
 
     signals.gross_margin,
     signals.operating_income / nullif(signals.revenue, 0)                    as operating_margin,
-    signals.net_income / nullif(signals.revenue, 0)                          as net_margin,
+    signals.net_income_used / nullif(signals.revenue, 0)                     as net_margin,
     (signals.operating_cash_flow - signals.capex) / nullif(signals.revenue, 0) as free_cash_flow_margin,
     signals.total_debt / nullif(signals.shareholders_equity, 0)              as debt_to_equity,
     -- Sloan accruals ratio: earnings not backed by cash, scaled by average assets.
-    (signals.net_income - signals.operating_cash_flow)
+    (signals.net_income_used - signals.operating_cash_flow)
         / nullif((signals.total_assets + signals.prior_total_assets) / 2, 0) as accruals_ratio,
 
     signals.f_roa_positive,

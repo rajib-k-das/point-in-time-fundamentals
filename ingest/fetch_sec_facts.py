@@ -92,6 +92,23 @@ def download_company_facts(raw_dir: Path, refresh: bool) -> None:
         print(f"  saved    {ticker} (CIK {cik})")
         time.sleep(SEC_REQUEST_PAUSE_SECONDS)
 
+    # Decision 025: companies that reorganized under a new registrant keep their history under the
+    # predecessor CIK. Download it too, as <TICKER>__<CIK>.json.
+    universe = {row["ticker"] for row in read_seed("company_universe.csv")}
+    for predecessor in read_seed("predecessor_ciks.csv"):
+        ticker, cik = predecessor["ticker"], predecessor["cik"].zfill(10)
+        if ticker not in universe:
+            continue
+        target = raw_dir / f"{ticker}__{cik}.json"
+        if target.exists() and not refresh:
+            print(f"  cached   {ticker} predecessor (CIK {cik})")
+            continue
+        response = session.get(FACTS_URL.format(cik=cik), timeout=60)
+        response.raise_for_status()
+        target.write_text(response.text)
+        print(f"  saved    {ticker} predecessor (CIK {cik})")
+        time.sleep(SEC_REQUEST_PAUSE_SECONDS)
+
 
 def flatten_company_facts(payload: dict, ticker: str, wanted: dict[str, set[str]]) -> list[dict]:
     """Turn the nested SEC JSON into one row per reported value, for mapped concepts only."""
@@ -136,7 +153,8 @@ def load_to_duckdb(raw_dir: Path) -> None:
     if not files:
         sys.exit(f"No JSON files found in {raw_dir}")
     for path in files:
-        rows.extend(flatten_company_facts(json.loads(path.read_text()), path.stem, wanted))
+        ticker = path.stem.split("__")[0]  # predecessor files are named <TICKER>__<CIK>.json
+        rows.extend(flatten_company_facts(json.loads(path.read_text()), ticker, wanted))
 
     df = pd.DataFrame(rows)
     df["loaded_at"] = datetime.now(timezone.utc).replace(tzinfo=None)

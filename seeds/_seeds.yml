@@ -18,3 +18,11 @@ seeds:
     columns:
       - name: ticker
         data_tests: [unique, not_null]
+
+  - name: predecessor_ciks
+    description: >
+      Registrants whose filing history belongs to a company that now files under a new CIK
+      (decision 025), e.g. after a holding-company reorganization.
+    columns:
+      - name: cik
+        data_tests: [unique, not_null]

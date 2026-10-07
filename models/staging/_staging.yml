@@ -8,6 +8,10 @@ models:
         description: Surrogate key (cik + concept + unit + period + accession number).
         data_tests: [unique, not_null]
       - name: cik
+        description: The company's current CIK (decision 025). Predecessor filings are mapped onto it.
+        data_tests: [not_null]
+      - name: filer_cik
+        description: The CIK that actually filed the value; differs from cik for predecessor history.
         data_tests: [not_null]
       - name: concept
         data_tests: [not_null]

@@ -1,0 +1,14 @@
+{
+  "cik": 1,
+  "entityName": "Fixture Corp Predecessor (synthetic test data)",
+  "facts": {
+    "us-gaap": {
+      "NetIncomeLoss": {"units": {"USD": [
+        {"start": "2019-01-01", "end": "2019-12-31", "val": 5000000, "accn": "0000000001-20-000001", "fy": 2019, "fp": "FY", "form": "10-K", "filed": "2020-02-14"}
+      ]}},
+      "Assets": {"units": {"USD": [
+        {"end": "2019-12-31", "val": 380000000, "accn": "0000000001-20-000001", "fy": 2019, "fp": "FY", "form": "10-K", "filed": "2020-02-14"}
+      ]}}
+    }
+  }
+}

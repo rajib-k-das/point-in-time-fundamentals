@@ -216,8 +216,50 @@ at all for XOM.
 **Tools:** `analyses/coverage_by_company.sql` shows which metrics are missing from each company's latest annual
 report; `scripts/discover_tags.py` lists the tags a company actually uses, with their latest 10-K values.
 
+## 022 — Net income falls back to the consolidated figure, visibly
+
+**Decision:** New metric `net_income_incl_nci` (`ProfitLoss`: net income including non-controlling interests). The
+screen uses `net_income` (attributable to the parent) and falls back to `net_income_incl_nci` only when it's missing,
+recording `net_income_basis`. Year-over-year comparisons (the ROA-improvement signal) require the same basis in both years.
+**Evidence:** Caterpillar reports `ProfitLoss` (8.88B) rather than `NetIncomeLoss`; its NCI share is ~0.
+**Why not map ProfitLoss into net_income?** The two differ by the minority share, so by decision 012 they are separate metrics;
+the fallback lives in the mart, where it's explicit.
+
+## 023 — Total debt from the first available source, with the source recorded
+
+**Decision:** New metrics `long_term_debt_incl_leases` and `total_debt_reported`. `total_debt` is the first available of:
+1. `LongTermDebt` (including current portion) + short-term debt — the project's definition;
+2. non-current + current long-term debt + short-term debt;
+3. the company's own total (`DebtLongtermAndShorttermCombinedAmount`);
+4. long-term debt **including finance leases** + short-term debt.
+Every row carries `total_debt_source`.
+**Evidence:** KO, CVX and ORCL stopped reporting `LongTermDebt` after 2021–2023; KO, VZ and CVX now report debt including
+finance leases, and VZ and ORCL report a combined total (VZ: 157.7B incl. leases + 0.44B short-term = 158.2B reported ✓).
+**Trade-off:** sources 3 and 4 can include finance leases, so totals are not perfectly comparable *across* companies.
+The source column makes that visible instead of hiding it.
+
+## 024 — The leverage signal uses total debt, compared on the same source
+
+**Decision:** Piotroski's leverage signal is total debt over average total assets, and it is only scored when both years
+use the same `total_debt_source`; otherwise it's unknown.
+**Why:** Piotroski's original uses long-term debt only, which 7 of 28 companies don't report consistently. Total debt
+covers them. The same-source rule matters: KO switched to a lease-inclusive tag in 2024, so comparing 2024 to 2023 would
+read leases as new borrowing.
+**Deviation from the original:** documented here and in the README.
+
+## 025 — Predecessor registrants: history follows the company, not the CIK
+
+**Decision:** `seeds/predecessor_ciks.csv` lists old CIKs whose filings belong to a company that now files under a new one.
+Ingestion downloads them too, and staging keys every value to the company's **current** CIK, keeping the original as `filer_cik`.
+**Evidence:** XOM had no data at all. The SEC ticker list now maps XOM to **ExxonMobil Holdings Corp** (CIK 0002115436), the
+successor issuer in a 2026 holding-company reorganization (Form 8-K12B), with no 10-K history yet. All of ExxonMobil's
+history is under Exxon Mobil Corporation (CIK 0000034088).
+**Why key to the current CIK:** when the successor files its first 10-K, its comparatives re-report the predecessor's
+periods. Keyed to one CIK, they're treated correctly as re-reports of the same facts, so restatement detection keeps working
+across the reorganization.
+**Test:** the fixture has a predecessor file; `assert_fixture_known_answers` checks its history lands on the current company.
+
 ## Open questions (next)
 
-- **Coverage gaps (decision 021):** review discovery results for KO, ORCL, VZ, CVX, CAT and XOM.
 - **Diluted shares and stock splits:** same-tag diluted-share restatements have a median change of exactly 100%.
   Hypothesis: prior share counts re-presented after splits. Verify against known split dates.

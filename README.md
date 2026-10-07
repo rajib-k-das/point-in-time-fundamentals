@@ -62,6 +62,8 @@ But the changes were not all restatements:
   Splitting them into two metrics cut equity's restatement rate from **29.2% to 1.9%**.
 - **Trailing figures posing as fiscal years:** Amazon's 10-Qs report trailing-twelve-month cash flows, which a
   duration-only rule mistook for a fiscal year ending in June. A fiscal year now requires a 10-K.
+- **A company changing identity:** ExxonMobil reorganized under a new holding company in 2026, and the SEC ticker list
+  now points to a registrant with no financial history. The pipeline follows predecessor CIKs so history stays attached.
 - **Genuine revisions:** amendments, and re-presentations after divestitures or new accounting standards
   (e.g. revenue re-tagged and restated under ASC 606 in 2018, flagged as `is_tag_switch`).
 
@@ -100,7 +102,7 @@ A warehouse that keeps only the latest values would report 9 for both dates.
 
 ## Testing
 
-64 dbt tests run on every push (GitHub Actions), including:
+68 dbt tests run on every push (GitHub Actions), including:
 
 - **Point-in-time integrity:** one current version per fact, and no gaps or overlaps in validity windows.
 - **Mapping integrity:** each XBRL tag feeds one metric, and no metric mixes units or period types.
@@ -120,6 +122,8 @@ Highlights:
 - **Keep scale errors, but flag them.** Point-in-time history stays honest; screens filter them out.
 - **Known the day after filing.** Filings often land after the close, so same-day use would leak information.
 - **Derived values are versioned too.** Q4 is valid only while both of its inputs were public.
+- **Fallbacks are explicit.** When a company lacks a preferred tag, the screen falls back and records the source
+  (`total_debt_source`, `net_income_basis`); year-over-year signals only compare like with like.
 - **Financial-sector companies excluded.** Banks don't report gross profit or current assets,
   so standard screening scores don't apply to them.
 

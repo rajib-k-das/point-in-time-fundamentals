@@ -22,3 +22,6 @@ total_equity,StockholdersEquityIncludingPortionAttributableToNoncontrollingInter
 short_term_borrowings,ShortTermBorrowings,1,USD,instant
 long_term_debt_current,LongTermDebtCurrent,1,USD,instant
 commercial_paper,CommercialPaper,1,USD,instant
+net_income_incl_nci,ProfitLoss,1,USD,duration
+long_term_debt_incl_leases,LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities,1,USD,instant
+total_debt_reported,DebtLongtermAndShorttermCombinedAmount,1,USD,instant

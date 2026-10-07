@@ -40,11 +40,16 @@ def main() -> None:
     pattern = re.compile(args.pattern, re.IGNORECASE)
 
     for ticker in args.tickers:
-        path = args.raw_dir / f"{ticker.upper()}.json"
-        if not path.exists():
-            print(f"\n{ticker}: no file at {path}")
+        paths = sorted(args.raw_dir.glob(f"{ticker.upper()}.json")) + sorted(args.raw_dir.glob(f"{ticker.upper()}__*.json"))
+        if not paths:
+            print(f"\n{ticker}: no files in {args.raw_dir}")
             continue
-        facts = json.loads(path.read_text()).get("facts", {}).get("us-gaap", {})
+        facts: dict = {}
+        for path in paths:  # current filer plus any predecessor CIKs (decision 025)
+            for concept, body in json.loads(path.read_text()).get("facts", {}).get("us-gaap", {}).items():
+                merged = facts.setdefault(concept, {"units": {}})
+                for unit, values in body.get("units", {}).items():
+                    merged["units"].setdefault(unit, []).extend(values)
         rows = []
         for concept, body in facts.items():
             if not pattern.search(concept):
