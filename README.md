@@ -30,7 +30,7 @@ can be queried **as of** any date.
 | Intermediate | Derived Q4 values (annual minus nine-month YTD), versioned by the overlap of both inputs | ✅ Done |
 | Marts | `dim_company`, `dim_date`, point-in-time `fct_fundamentals` | ✅ Done |
 | Marts | Monthly screen: Piotroski F-score, accruals ratio, margins, total debt | ✅ Done |
-| BI | Tableau Public dashboard: today's screen, restatement story, point-in-time history | 🔄 In progress |
+| BI | Tableau Public dashboard: today's screen, restatement story, point-in-time history | ✅ Done |
 
 ## Architecture
 
