@@ -3,6 +3,8 @@
 --   Q4 2022 revenue = annual - nine months: 120 - 87 = 33, then 114 - 87 = 27 after the 10-K/A.
 --   F-score on 2023-03-31 = 8 of 8: the share count is a scale error, so that signal is unknown.
 --   F-score on 2024-03-31 = 9 of 9: the corrected share count arrived on 2024-02-13.
+--   TTM figures from a 10-Q (12 months to 2022-09-30) must never become a fiscal year:
+--   on 2022-11-30 the latest fiscal year is still FY2021 (decision 019).
 with q4_expected as (
 
     select * from (values
@@ -29,6 +31,7 @@ q4_actual as (
 score_expected as (
 
     select * from (values
+        (date '2022-11-30', null, null),
         (date '2023-03-31', 8, 8),
         (date '2024-03-31', 9, 9)
     ) as t(as_of_date, expected_score, expected_available)
@@ -55,8 +58,25 @@ failures as (
 
     select 'F-score on ' || as_of_date
     from score_actual
-    where f_score is distinct from expected_score
-       or f_score_signals_available is distinct from expected_available
+    where expected_score is not null
+      and (f_score is distinct from expected_score
+           or f_score_signals_available is distinct from expected_available)
+
+    union all
+
+    select 'TTM treated as fiscal year on 2022-11-30'
+    from {{ ref('fct_screening_monthly') }}
+    where ticker = 'FIXT'
+      and as_of_date = date '2022-11-30'
+      and fiscal_year_end is distinct from date '2021-12-31'
+
+    union all
+
+    select 'TTM value in fct_fundamentals'
+    from {{ ref('fct_fundamentals') }}
+    where ticker = 'FIXT'
+      and period_end = date '2022-09-30'
+      and period_grain = 'annual'
 
 )
 

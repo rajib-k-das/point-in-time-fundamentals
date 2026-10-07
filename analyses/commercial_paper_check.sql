@@ -1,4 +1,4 @@
--- Decision 018 check: is commercial paper reported inside short-term borrowings, or separately?
+-- Decisions 018 and 020 check (total debt uses borrowings when reported, otherwise paper; never both): is commercial paper reported inside short-term borrowings, or separately?
 -- For each company's fiscal-year-end balance sheets (current versions), classify the pattern.
 with balances as (
 
@@ -20,8 +20,8 @@ select
     case
         when commercial_paper is null      then 'borrowings only'
         when short_term_borrowings is null then 'commercial paper only'
-        when commercial_paper > short_term_borrowings then 'both: paper exceeds borrowings (added)'
-        else 'both: paper within borrowings (not added)'
+        when commercial_paper > short_term_borrowings then 'both: paper exceeds borrowings (likely reclassified)'
+        else 'both: paper within borrowings'
     end                     as pattern,
     count(*)                as balance_sheets,
     min(period_end)         as first_period,

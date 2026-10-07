@@ -50,14 +50,9 @@ ratios as (
         *,
         -- Decision 018: total debt = long-term debt including its current portion + short-term debt.
         coalesce(long_term_debt_incl_current, long_term_debt + coalesce(long_term_debt_current, 0))
-            + case
-                when short_term_borrowings is null and commercial_paper is null then 0
-                when short_term_borrowings is null then commercial_paper
-                when commercial_paper is null then short_term_borrowings
-                -- Commercial paper larger than the borrowings total can't be inside it: add both.
-                when commercial_paper > short_term_borrowings then short_term_borrowings + commercial_paper
-                else short_term_borrowings
-              end                                                              as total_debt,
+            -- Decision 020: short-term borrowings when reported, otherwise commercial paper; never both,
+            -- because companies may reclassify paper into long-term debt (double counting).
+            + coalesce(short_term_borrowings, commercial_paper, 0)               as total_debt,
 
         net_income / nullif(prior_total_assets, 0)                             as roa,
         prior_net_income / nullif(two_back_total_assets, 0)                    as prior_roa,

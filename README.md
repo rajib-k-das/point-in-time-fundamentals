@@ -60,6 +60,8 @@ But the changes were not all restatements:
 - **Mapping artifacts:** shareholders' equity looked restated for 29% of facts, three times any other metric. In fact,
   91% of those "restatements" were filings switching between equity *with* and *without* non-controlling interest.
   Splitting them into two metrics cut equity's restatement rate from **29.2% to 1.9%**.
+- **Trailing figures posing as fiscal years:** Amazon's 10-Qs report trailing-twelve-month cash flows, which a
+  duration-only rule mistook for a fiscal year ending in June. A fiscal year now requires a 10-K.
 - **Genuine revisions:** amendments, and re-presentations after divestitures or new accounting standards
   (e.g. revenue re-tagged and restated under ASC 606 in 2018, flagged as `is_tag_switch`).
 

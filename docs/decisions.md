@@ -180,14 +180,44 @@ count split-adjusted, and the SCD2 model uses that newer version for both years.
 
 **Decision:** `total_debt = long-term debt including current portion + short-term debt`.
 Long-term part: `LongTermDebt`, or `LongTermDebtNoncurrent + LongTermDebtCurrent` when only the split is reported.
-Short-term part: `ShortTermBorrowings`; `CommercialPaper` when it's the only short-term tag; both added only when
-commercial paper exceeds the borrowings total (so it can't be inside it). No short-term tag counts as zero.
+Short-term part: see decision 020. No short-term tag counts as zero.
 **Why:** No single XBRL tag equals total debt, and commercial paper is sometimes inside short-term borrowings and
 sometimes separate. Adding both blindly double-counts; ignoring paper undercounts.
 **Check:** `analyses/commercial_paper_check.sql` classifies every company's pattern on real data.
 
+## 019 — A fiscal year is a 12-month period reported in a 10-K
+
+**Decision:** A ~12-month period is classified `annual` only if a 10-K or 10-K/A reported it. Twelve-month periods
+that appear only in 10-Qs are `trailing_twelve_months` and are excluded from fiscal-year logic.
+**Evidence:** The first real-data screen showed Amazon with a fiscal year ending **2026-06-30** and an F-score of
+1 of 1. Amazon's year ends in December; its 10-Qs report trailing-twelve-month cash-flow figures, which the
+duration-only rule mistook for a fiscal year.
+**Why at the fact level:** the check looks at every filing of the same period, so one period can never be split
+between two grains.
+**Test:** the fixture includes a 10-Q with twelve-month figures; `assert_fixture_known_answers` fails if they become
+a fiscal year. Reverting the rule makes the test fail (verified).
+
+## 020 — Short-term debt: borrowings if reported, otherwise commercial paper, never both
+
+**Decision:** `short-term debt = coalesce(ShortTermBorrowings, CommercialPaper, 0)`. This replaces the earlier
+rule that added both when commercial paper exceeded borrowings.
+**Evidence:** `commercial_paper_check` found the "add both" rule firing on 23 balance sheets (Chevron, Microsoft).
+Companies such as Chevron reclassify commercial paper into long-term debt when they intend and are able to
+refinance it, so the paper can be larger than short-term borrowings and *already counted* in long-term debt.
+**Trade-off:** If a company reports paper separately from borrowings and doesn't reclassify it, total debt is
+understated by the paper. A small, visible undercount is preferable to silent double counting.
+
+## 021 — Coverage gaps are closed tag by tag, under the decision 012 rule
+
+**Decision:** When a company reports a metric under a tag we don't map, add that tag to `concept_map` only if it
+measures the same thing as the existing tags. Otherwise leave the value unknown.
+**Evidence:** the first screen had no debt for KO, ORCL, VZ and CVX, missing cash-flow inputs for CAT, and no row
+at all for XOM.
+**Tools:** `analyses/coverage_by_company.sql` shows which metrics are missing from each company's latest annual
+report; `scripts/discover_tags.py` lists the tags a company actually uses, with their latest 10-K values.
+
 ## Open questions (next)
 
+- **Coverage gaps (decision 021):** review discovery results for KO, ORCL, VZ, CVX, CAT and XOM.
 - **Diluted shares and stock splits:** same-tag diluted-share restatements have a median change of exactly 100%.
   Hypothesis: prior share counts re-presented after splits. Verify against known split dates.
-- **Commercial paper rule:** review `commercial_paper_check` results and confirm decision 018 per company.
